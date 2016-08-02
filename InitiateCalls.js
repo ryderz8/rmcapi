@@ -2,6 +2,7 @@ var winston = require('winston');
 module.exports.initiateDB = function(callback) {
     var mongoose = require('mongoose');
     var uristring = process.env.TEST ? (CONFIG.dbconfig.testUrl + '/' + CONFIG.dbconfig.testDatabase) : '';
+    mongoose.Promise = global.Promise;
     mongoose.connect(uristring, function(error, response) {
         if (error) {
             winston.error(error);

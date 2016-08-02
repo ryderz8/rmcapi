@@ -1,7 +1,15 @@
-Model = module.exports;
+var Model = module.exports;
 var Oauth2Lib = require('../Lib/Oauth2Lib.js');
 var winston = require('winston');
+var jwt = require('jsonwebtoken');
+var fs = require("fs");
+var path = require("path");
 Model.getAccessToken = function(bearerToken, callback) {
+    var cert = fs.readFileSync(path.join(__dirname, '../', 'Files/JWTcert.pem'));
+    jwt.verify(bearerToken, cert, function(err, decoded) {
+        console.log(err);
+        console.log(decoded) // bar
+    });
     winston.log('info', 'GET-BEARER-TOKEN', {
         bearerToken: bearerToken
     });
@@ -34,15 +42,16 @@ Model.saveAccessToken = function(token, clientId, expires, userId, callback) {
     winston.log('info', 'SAVE-ACCESS-TOKEN', {
         accessToken: token,
         clientId: clientId,
-        userId: userId,
         expires: expires
     });
-    new(Oauth2Lib.getOauthAccessTokenModel())({
+    var OAuthAccessTokensModel = Oauth2Lib.getOauthAccessTokenModel();
+    var OAuthAccessToken = new OAuthAccessTokensModel({
         accessToken: token,
         clientId: clientId,
         userId: userId,
         expires: expires
-    }).save(callback);
+    });
+    OAuthAccessToken.save(callback);
 };
 Model.getUser = function(username, password, callback) {
     winston.log('info', 'GET-USER', {
@@ -69,6 +78,15 @@ Model.saveRefreshToken = function(token, clientId, expires, userId, callback) {
         expires: expires
     });
     refreshToken.save(callback);
+}
+Model.generateToken = function(type, req, callback) {
+    var key = fs.readFileSync(path.join(__dirname, '../', 'Files/JWTkey.pem'));
+    var token = jwt.sign({
+        dummy: 'data'
+    }, key, {
+        algorithm: 'RS256'
+    });
+    callback(false, token);
 }
 Model.getRefreshToken = function(refreshToken, callback) {
     winston.log('info', 'GET-REFRESH-TOKEN', {
