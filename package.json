@@ -4,8 +4,8 @@
   "description": "This is the rmc api for all the features",
   "main": "main.js",
   "scripts": {
-    "test": "TEST=true node server.js",
-    "start": "node server.js"
+    "test": "TEST=true node Server.js",
+    "start": "node Server.js"
   },
   "author": "",
   "license": "ISC",

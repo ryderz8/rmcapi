@@ -1,6 +1,6 @@
-CONFIG = require('./config.js');
+CONFIG = require('./Config.js');
 var async = require('async');
-var initiateCalls = require('./initiateCalls.js')
+var initiateCalls = require('./InitiateCalls.js')
 SERVER = {};
 async.waterfall([function(callback) {
     initiateCalls.initiateDB(callback);

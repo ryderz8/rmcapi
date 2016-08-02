@@ -44,6 +44,7 @@ module.exports.initiateServer = function(callback) {
     });
     callback(false, false);
 }
+module.exports.initiateRoutes = function(callback) {}
 module.exports.initiateListen = function(callback) {
     SERVER.listen(process.env.PORT || CONFIG.test.PORT, function() {
         winston.log('info', 'SERVER-LISTEN', {
