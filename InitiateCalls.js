@@ -42,9 +42,11 @@ module.exports.initiateServer = function(callback) {
         }, 'REQUEST');
         next();
     });
-    callback(false, false);
+    callback(false);
 }
-module.exports.initiateRoutes = function(callback) {}
+module.exports.initiateRoutes = function(callback) {
+    require("./Routes.js").initiateRoutes(callback);
+}
 module.exports.initiateListen = function(callback) {
     SERVER.listen(process.env.PORT || CONFIG.test.PORT, function() {
         winston.log('info', 'SERVER-LISTEN', {

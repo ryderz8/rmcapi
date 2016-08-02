@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
-var Schema = new Schema({
+var Schema = mongoose.Schema;
+module.exports = new Schema({
     username: {
         type: String
     },
@@ -13,7 +14,7 @@ var Schema = new Schema({
         type: String
     },
     email: {
-        type: String
+        type: String,
         default: ''
     }
 });

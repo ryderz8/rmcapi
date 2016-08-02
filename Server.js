@@ -7,6 +7,8 @@ async.waterfall([function(callback) {
 }, function(callback) {
     initiateCalls.initiateServer(callback);
 }, function(callback) {
+    initiateCalls.initiateRoutes(callback);
+}, function(callback) {
     initiateCalls.initiateListen(callback);
 }], function(error, data) {
     if (error) {

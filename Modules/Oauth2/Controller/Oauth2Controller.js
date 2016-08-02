@@ -5,5 +5,5 @@ router.oauth = oauthServer({
     grants: ['password'],
     debug: true
 });
-router.get('/Oauth2/Token', router.oauth.grant());
+router.post('/Oauth2/Token', router.oauth.grant());
 module.exports = router;
