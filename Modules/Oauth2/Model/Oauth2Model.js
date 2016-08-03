@@ -6,10 +6,10 @@ var fs = require("fs");
 var path = require("path");
 Model.getAccessToken = function(bearerToken, callback) {
     var cert = fs.readFileSync(path.join(__dirname, '../', 'Files/JWTcert.pem'));
-    // jwt.verify(bearerToken, cert, function(err, decoded) {
-    //     console.log(err);
-    //     console.log(decoded) // bar
-    // });
+    jwt.verify(bearerToken, cert, function(err, decoded) {
+        console.log(err);
+        console.log(decoded) // bar
+    });
     winston.log('info', 'GET-BEARER-TOKEN', {
         bearerToken: bearerToken
     });
@@ -60,7 +60,6 @@ Model.grantTypeAllowed = function(clientId, grantType, callback) {
         clientId: clientId,
         grantType: grantType
     });
-    console.log("grantType " + grantType);
     if (grantType === 'password') {
         return callback(false, authorizedClientIds.indexOf(clientId) >= 0);
     }
@@ -141,7 +140,34 @@ Model.getRefreshToken = function(refreshToken, callback) {
     winston.log('info', 'GET-REFRESH-TOKEN', {
         refreshToken: refreshToken
     });
-    Oauth2Lib.getOAuthRefreshTokensModel().findOne({
-        refreshToken: refreshToken
-    }, callback)
+    OAuthRefreshTokensModel = Oauth2Lib.getOAuthRefreshTokensModel();
+    OAuthRefreshTokensModel.aggregate([{
+        $match: {
+            refreshTokens: {
+                $elemMatch: {
+                    "token": refreshToken
+                }
+            }
+        }
+    }, {
+        $unwind: '$refreshTokens'
+    }, {
+        $match: {
+            "refreshTokens.token": refreshToken
+        }
+    }, {
+        $project: {
+            clientId: '$clientId',
+            userId: '$clientId',
+            refreshToken: '$refreshTokens.token',
+            expires: '$refreshTokens.expires'
+        }
+    }], function(error, documents) {
+        if (error) {
+            callback(error, false);
+        } else {
+            console.log(documents);
+            callback(false, documents[0]);
+        }
+    });
 }
