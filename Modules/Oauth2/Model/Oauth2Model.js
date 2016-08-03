@@ -33,6 +33,7 @@ Model.grantTypeAllowed = function(clientId, grantType, callback) {
         clientId: clientId,
         grantType: grantType
     });
+    console.log("grantType " + grantType);
     if (grantType === 'password') {
         return callback(false, authorizedClientIds.indexOf(clientId) >= 0);
     }
@@ -45,13 +46,24 @@ Model.saveAccessToken = function(token, clientId, expires, userId, callback) {
         expires: expires
     });
     var OAuthAccessTokensModel = Oauth2Lib.getOauthAccessTokenModel();
-    var OAuthAccessToken = new OAuthAccessTokensModel({
-        accessToken: token,
-        clientId: clientId,
-        userId: userId,
-        expires: expires
-    });
-    OAuthAccessToken.save(callback);
+    OAuthAccessTokensModel.findOneAndUpdate({
+        clientId: clientId
+    }, {
+        $push: {
+            accessTokens: [{
+                token: token,
+                expires: expires
+            }]
+        }
+    }, {
+        new: true
+    }, function(error, documents) {
+        if (error) {
+            callback(error);
+        } else {
+            callback(false);
+        }
+    })
 };
 Model.getUser = function(username, password, callback) {
     winston.log('info', 'GET-USER', {
@@ -67,17 +79,27 @@ Model.saveRefreshToken = function(token, clientId, expires, userId, callback) {
     winston.log('info', 'SAVE-REFRESH-TOKEN', {
         token: token,
         clientId: clientId,
-        expires: expires,
-        userId: userId
-    });
-    var OAuthRefreshTokensModel = Oauth2Lib.getOAuthRefreshTokensModel();
-    var refreshToken = new OAuthRefreshTokensModel({
-        refreshToken: token,
-        clientId: clientId,
-        userId: userId,
         expires: expires
     });
-    refreshToken.save(callback);
+    var OAuthRefreshTokensModel = Oauth2Lib.getOAuthRefreshTokensModel();
+    OAuthRefreshTokensModel.findOneAndUpdate({
+        clientId: clientId
+    }, {
+        $push: {
+            refreshTokens: [{
+                token: token,
+                expires: expires
+            }]
+        }
+    }, {
+        new: true
+    }, function(error, documents) {
+        if (error) {
+            callback(error);
+        } else {
+            callback(false);
+        }
+    })
 }
 Model.generateToken = function(type, req, callback) {
     var key = fs.readFileSync(path.join(__dirname, '../', 'Files/JWTkey.pem'));

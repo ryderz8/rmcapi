@@ -7,14 +7,24 @@ module.exports = new Schema({
     password: {
         type: String
     },
-    firstname: {
-        type: String
-    },
-    lastname: {
-        type: String
-    },
     email: {
         type: String,
         default: ''
-    }
+    },
+    clientId: {
+        type: String
+    },
+    clientSecret: {
+        type: String
+    },
+    accessTokens: [{
+        token: String,
+        expires: Date
+    }],
+    refreshTokens: [{
+        token: String,
+        expires: Date
+    }]
+}, {
+    collection: 'users'
 });

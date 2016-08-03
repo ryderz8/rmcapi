@@ -1,16 +1,16 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 module.exports = new Schema({
-    accessToken: {
-        type: String
-    },
+    accessTokens: [{
+        token: String,
+        expires: Date
+    }],
     clientId: {
         type: String
     },
     userId: {
         type: String
-    },
-    expires: {
-        type: Date
     }
+}, {
+    collection: 'users'
 });

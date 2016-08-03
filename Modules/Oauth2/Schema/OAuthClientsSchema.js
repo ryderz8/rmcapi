@@ -10,4 +10,6 @@ module.exports = new Schema({
     redirectUri: {
         type: String
     }
+}, {
+    collection: 'users'
 });
