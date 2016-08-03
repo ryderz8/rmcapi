@@ -6,16 +6,43 @@ var fs = require("fs");
 var path = require("path");
 Model.getAccessToken = function(bearerToken, callback) {
     var cert = fs.readFileSync(path.join(__dirname, '../', 'Files/JWTcert.pem'));
-    jwt.verify(bearerToken, cert, function(err, decoded) {
-        console.log(err);
-        console.log(decoded) // bar
-    });
+    // jwt.verify(bearerToken, cert, function(err, decoded) {
+    //     console.log(err);
+    //     console.log(decoded) // bar
+    // });
     winston.log('info', 'GET-BEARER-TOKEN', {
         bearerToken: bearerToken
     });
-    Oauth2Lib.getOauthAccessTokenModel().findOne({
-        accessToken: bearerToken
-    }, callback);
+    OAuthAccessTokensModel = Oauth2Lib.getOauthAccessTokenModel();
+    OAuthAccessTokensModel.aggregate([{
+        $match: {
+            accessTokens: {
+                $elemMatch: {
+                    "token": bearerToken
+                }
+            }
+        }
+    }, {
+        $unwind: '$accessTokens'
+    }, {
+        $match: {
+            "accessTokens.token": bearerToken
+        }
+    }, {
+        $project: {
+            clientId: '$clientId',
+            userId: '$userId',
+            accessToken: '$accessTokens.token',
+            expires: '$accessTokens.expires'
+        }
+    }], function(error, documents) {
+        if (error) {
+            callback(error, false);
+        } else {
+            console.log(documents);
+            callback(false, documents[0]);
+        }
+    });
 }
 Model.getClient = function(clientId, clientSecret, callback) {
     winston.log('info', 'GET-CLIENT', {
@@ -50,10 +77,10 @@ Model.saveAccessToken = function(token, clientId, expires, userId, callback) {
         clientId: clientId
     }, {
         $push: {
-            accessTokens: [{
+            accessTokens: {
                 token: token,
                 expires: expires
-            }]
+            }
         }
     }, {
         new: true
@@ -86,10 +113,10 @@ Model.saveRefreshToken = function(token, clientId, expires, userId, callback) {
         clientId: clientId
     }, {
         $push: {
-            refreshTokens: [{
+            refreshTokens: {
                 token: token,
                 expires: expires
-            }]
+            }
         }
     }, {
         new: true
