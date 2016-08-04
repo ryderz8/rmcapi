@@ -28,6 +28,7 @@ module.exports.initiateServer = function(callback) {
             }
         }),
         name: 'RMC - API',
+        formatters: require('./ErrorHandler.js'),
         version: process.env['npm_package_version']
     });
     SERVER.use(restify.authorizationParser());
@@ -47,6 +48,9 @@ module.exports.initiateServer = function(callback) {
 }
 module.exports.initiateRoutes = function(callback) {
     require("./Routes.js").initiateRoutes(callback);
+}
+module.exports.initiateErrorHandler = function(callback) {
+    require('./ErrorHandler').initiateErrorHandler(callback);
 }
 module.exports.initiateListen = function(callback) {
     SERVER.listen(process.env.PORT || CONFIG.test.PORT, function() {
